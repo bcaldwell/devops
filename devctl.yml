@@ -1,0 +1,8 @@
+---
+scripts:
+  add-server:
+    desc: bootstrap a new server
+    command: python setup.py
+  sshconfig: 
+    desc: create new sshconfig file
+    command: python sshconfig.py
