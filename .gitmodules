@@ -1,0 +1,8 @@
+[submodule "ansible"]
+	path = ansible
+	url = git@gitlab.caldwellbenjam.in:benjamin/ansible.git
+    ignore = dirty
+[submodule "kubernetes"]
+	path = kubernetes
+	url = git@gitlab.caldwellbenjam.in:benjamin/kubernetes.git
+    ignore = dirty
