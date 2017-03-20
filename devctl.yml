@@ -3,6 +3,9 @@ scripts:
   add-server:
     desc: bootstrap a new server
     command: python setup.py
-  sshconfig: 
+  sshconfig:
     desc: create new sshconfig file
     command: python sshconfig.py
+  ln:
+    desc: symlink
+    command: ln -si "${HOME}/src/gitlab.caldwellbenjam.in/benjamin/kubernetes" $(pwd)/kubernetes && ln -si ${HOME}/src/gitlab.caldwellbenjam.in/benjamin/devops-config $(pwd)/config
