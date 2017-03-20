@@ -118,3 +118,4 @@ ENV/
 /config
 
 .DS_Store
+/kubernetes
