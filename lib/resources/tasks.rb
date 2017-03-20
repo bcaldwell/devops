@@ -1,7 +1,7 @@
 require_relative "./printer"
 
-module Checks
-  class Check
+module Tasks
+  class Task
     def initialize(name, list_title = nil, end_check = true)
       @name = name
       @list_title = list_title
@@ -18,6 +18,10 @@ module Checks
 
     def list(&blk)
       @set_list = blk
+    end
+
+    def list_logger(&blk)
+      @list_logger = blk
     end
 
     def run
@@ -60,9 +64,17 @@ module Checks
 
     def print_list
       return if @list_title.nil?
+      sucessful = true
       logger.put_header(@list_title)
-      @list.each { |item| logger.log item }
-      logger.put_footer
+      @list.each do |item|
+        unless @list_logger.nil?
+          result = @list_logger.call(item)
+          sucessful = false if result == false
+          next
+        end
+        logger.log item
+      end
+      logger.put_footer sucessful
     end
 
     def logger
@@ -70,19 +82,19 @@ module Checks
     end
   end
 
-  @checks = []
-  def self.new_check(name, list_title: nil, end_check: true, &blk)
-    check = Check.new(name, list_title, end_check).tap { |c| c.instance_eval(&blk) }
-    @checks.push(check)
+  @tasks = []
+  def self.new_task(name, list_title: nil, end_check: true, &blk)
+    check = Task.new(name, list_title, end_check).tap { |c| c.instance_eval(&blk) }
+    @tasks.push(check)
     check
   end
 
   def self.reset
-    @checks = []
+    @tasks = []
   end
 
   def self.run
-    @checks.each(&:run)
+    @tasks.each(&:run)
   end
 end
 
