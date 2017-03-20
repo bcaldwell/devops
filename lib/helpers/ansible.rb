@@ -17,7 +17,11 @@ class Ansible
     node_entries = nodes.map { |node| ansible_host_entry(node) }
     File.write(hosts_file, "[kubernetes]\n#{node_entries.join("\n")}")
 
-    exit_code = system({ "ANSIBLE_ROLES_PATH" => @role_dir }, 'ansible-playbook', playbook_file, '-i', hosts_file, '-e', options_string.to_s)
+    exit_code = system({ "ANSIBLE_ROLES_PATH" => @role_dir },
+      'ansible-playbook', playbook_file,
+      '-i', hosts_file,
+      '-e', options_string.to_s
+    )
     FileUtils.rm(hosts_file)
 
     exit_code
