@@ -1,9 +1,6 @@
-inherit_from: http://shopify.github.io/ruby-style-guide/rubocop.yml
-# AllCops:
-  # TargetRubyVersion: 2.3
-  # Exclude:
-  #   - bin/*
-  #   - db/schema.rb
+inherit_from:
+  - http://shopify.github.io/ruby-style-guide/rubocop.yml
 
-Style/ClassAndModuleChildren:
-  Enabled: false
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
