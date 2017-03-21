@@ -1,4 +1,4 @@
 [submodule "ansible"]
 	path = ansible
-	url = git@gitlab.caldwellbenjam.in:benjamin/ansible.git
+	url = git@github.com:benjamincaldwell/ansible.git
     ignore = dirty
