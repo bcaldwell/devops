@@ -11,6 +11,7 @@ require 'parallel'
 require 'fileutils'
 require 'optparse'
 require 'byebug'
+
 module Kubernetes
   class Setup
     PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
@@ -168,7 +169,7 @@ module Kubernetes
           @list.empty?
         end
         exec do
-          ansible.run_playbook(nodes, 'kubernetes/kubernetes-bootstrap')
+          ansible.run_playbook(nodes, 'kubernetes/bootstrap')
         end
         list_logger do |node|
           logger.log(node['ip'])
@@ -183,7 +184,7 @@ module Kubernetes
           @list.empty?
         end
         exec do
-          ansible.run_playbook([master], 'kubernetes/kubernetes-master')
+          ansible.run_playbook([master], 'kubernetes/master-init')
         end
         list_logger do |node|
           logger.log(node['ip'])
@@ -193,14 +194,14 @@ module Kubernetes
       Tasks.new_task "Joining nodes to cluster", list_title: "Nodes to join" do
         check? do
           @list = parallel_list workers do |node|
-            !Server.remote_check(node, "tail -n 1 /etc/kubernetes/kubelet.conf")
+            !Server.remote_check(node, "kubectl --kubeconfig  /etc/kubernetes/kubelet.conf get nodes | grep $(hostname)")
           end
           @list.empty?
         end
         exec do
           command = 'kubectl -n kube-system get secret clusterinfo -o yaml | grep token-map | awk \'{print $2}\' | base64 -d | sed "s|{||g;s|}||g;s|:|.|g;s/\"//g;" | xargs echo'
           join_token = Server.remote_command(master, command)
-          ansible.run_playbook(@list, 'kubernetes/kubernetes-node', join_token: join_token, master_ip: master["ip"])
+          ansible.run_playbook(@list, 'kubernetes/node-join', join_token: join_token, master_ip: master["ip"])
         end
         list_logger do |node|
           logger.log(node['ip'])
