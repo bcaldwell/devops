@@ -1,30 +1,35 @@
 # Add current directory to load path
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
-require 'printer'
+require 'helpers/printer'
+require 'helpers/secrets'
+
 require 'net/http'
 require 'uri'
 require 'json'
+require 'yaml'
 
-API_KEY = ENV["CAC_API_KEY"]
-raise "CAC_API_KEY env variable not set" if API_KEY.nil?
+PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 
-EMAIL = ENV["CAC_EMAIL"]
-raise "CAC_EMAIL env variable not set" if EMAIL.nil?
+secrets = Secrets.new(File.join(PROJECT_DIR, "config", "secrets.ejson"), [:cloud_at_cost_email, :cloud_at_cost_api_key])
+
+API_KEY = secrets.cloud_at_cost_api_key
+
+EMAIL = secrets.cloud_at_cost_email
 
 CPU = 2
 RAM = 1024
-STORAGE = 20
+STORAGE = 25
 OS = 27
 
-put_header("Configuration")
-log("CPU: #{CPU}")
-log("RAM: #{RAM}")
-log("STORAGE: #{STORAGE}")
-log("OS: #{OS}")
-put_footer true
+Printer.put_header("Configuration")
+Printer.log("CPU: #{CPU}")
+Printer.log("RAM: #{RAM}")
+Printer.log("STORAGE: #{STORAGE}")
+Printer.log("OS: #{OS}")
+Printer.put_footer true
 
-put_header("Requesting server to be built")
+Printer.put_header("Requesting server to be built")
 uri = URI.parse("https://panel.cloudatcost.com/api/v1/cloudpro/build.php")
 body = {
   login: EMAIL,
@@ -39,12 +44,12 @@ http.use_ssl = true
 request = Net::HTTP::Post.new(uri.request_uri)
 request.set_form_data(body)
 response = http.request(request)
-log("Status: #{response.code}")
+Printer.log("Status: #{response.code}")
 server_built = JSON.parse(response.body)
-log JSON.pretty_generate(server_built)
-put_footer true
+Printer.log JSON.pretty_generate(server_built)
+Printer.put_footer true
 
-put_header("Setting run mode to normal")
+Printer.put_header("Setting run mode to normal")
 uri = URI.parse('https://panel.cloudatcost.com/api/v1/listservers.php')
 params = {
   login: EMAIL,
@@ -52,7 +57,7 @@ params = {
 }
 uri.query = URI.encode_www_form(params)
 resp = JSON.parse(Net::HTTP.get(uri))
-log "List server request status: #{resp['status']}"
+Printer.log "List server request status: #{resp['status']}"
 server = resp["data"].select { |node| node["servername"] == server_built["servername"] }.first
 # Add params to URI
 uri.query = URI.encode_www_form(params)
@@ -69,7 +74,18 @@ http.use_ssl = true
 request = Net::HTTP::Post.new(uri.request_uri)
 request.set_form_data(body)
 response = http.request(request)
-log("Status: #{response.code}")
-server = JSON.parse(response.body)
-log JSON.pretty_generate(server)
-put_footer true
+Printer.log("Status: #{response.code}")
+resp = JSON.parse(response.body)
+Printer.log JSON.pretty_generate(resp)
+Printer.put_footer true
+
+Printer.put_header "Server data"
+server_data = [
+  {
+    "ip" => server["ip"],
+    "user" => "root",
+    "password" => server["rootpass"]
+  }
+]
+puts server_data.to_yaml
+Printer.put_footer
