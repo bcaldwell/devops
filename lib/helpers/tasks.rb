@@ -65,7 +65,7 @@ module Tasks
     def print_list
       return if @list_title.nil?
       sucessful = true
-      logger.put_header(@list_title)
+      logger.put_header("#{@list_title} (#{@list.count})")
       @list.each do |item|
         unless @list_logger.nil?
           result = @list_logger.call(item)

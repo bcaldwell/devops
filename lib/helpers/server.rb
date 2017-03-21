@@ -43,5 +43,20 @@ class Server
         download! remote, local
       end
     end
+
+    def hostname(node)
+      remote_command(node, "hostname")
+    end
+
+    def change_hostname(node, hostname, current_hostname = nil)
+      current_hostname = hostname(node) if current_hostname.nil?
+      host = remote_host(node)
+      on host do |_host|
+        %w(/etc/hostname /etc/hosts).each do |file|
+          execute :sed, "-i 's/#{current_hostname}/#{hostname}/g' #{file}"
+        end
+        execute :hostname, node['hostname']
+      end
+    end
   end
 end
