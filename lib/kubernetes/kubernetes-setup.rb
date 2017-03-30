@@ -1,8 +1,9 @@
 # Add current directory to load path
 $LOAD_PATH.unshift File.dirname(__FILE__)
 
+require 'kubernetes_base'
+
 require 'helpers/printer'
-require 'helpers/ansible'
 require 'helpers/tasks'
 require 'helpers/server'
 
@@ -13,36 +14,13 @@ require 'optparse'
 require 'byebug'
 
 module Kubernetes
-  class Setup
-    PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-
+  class Setup < Kubernetes::Base
     def initialize
-      @options = {}
-      @options[:config_dir] = File.join(PROJECT_DIR, "config")
-
-      playbook_dir = File.join(PROJECT_DIR, 'ansible/playbooks')
-      role_dir = File.join(PROJECT_DIR, 'ansible/roles')
-
-      @options[:config_file] = File.join(@options[:config_dir], 'kubernetes-setup.yml')
-
-      @options[:master_hostname] = "kube-master"
-      @options[:node_hostname] = "kube-node-{{number}}"
-      @options[:node_hostname_regex] = /^node-(\d*)$/
-
-      @ansible = Ansible.new(playbook_dir: playbook_dir, role_dir: role_dir, default_host: "kubernetes")
-
-      OptionParser.new do |opts|
-        opts.banner = "Usage: kubernetes-setup [options]"
-
-        opts.on('-c', '--config NAME', 'config file') { |v| @options[:config_file] = File.expand_path(v) }
-      end.parse!
+      super
+      raise 'no master node' if @master.empty?
     end
 
     def run
-      FileUtils.mkdir_p(@options[:config_dir]) unless File.exist?(@options[:config_dir])
-
-      read_and_filter
-
       nodes = @nodes
       master = @master
       workers = @workers
@@ -50,8 +28,6 @@ module Kubernetes
       ansible = @ansible
 
       options = @options
-
-      cluster_config_file = File.join(@options[:config_dir], "cluster.conf")
 
       Tasks.new_task "Master node" do
         list { [master] }
@@ -85,7 +61,7 @@ module Kubernetes
         end
       end
 
-      Tasks.new_task "Changing hostnames", list_title: "Nodes to change hostnae on" do
+      Tasks.new_task "Changing hostnames", list_title: "Nodes to change hostname on" do
         check? do
           hostname_nodes = Parallel.map(nodes) do |node|
             node["current_hostname"] = Server.hostname(node)
@@ -94,7 +70,7 @@ module Kubernetes
           # hash of taken hostname number. Initialize with true to disable 0
           # initialize with all nil so there is atleast space for each node
           hostname_db = [true, *[nil] * hostname_nodes.size]
-          hostname_nodes = Parallel.map(hostname_nodes) do |node|
+          hostname_nodes = hostname_nodes.map do |node|
             if node["role"] == "master"
               node["hostname"] = options[:master_hostname]
               next node
@@ -102,7 +78,7 @@ module Kubernetes
 
             num = node["current_hostname"][options[:node_hostname_regex], 1]
 
-            if num
+            if num && !hostname_db[num.to_i]
               hostname_db[num.to_i] = true
               node["hostname"] = node["current_hostname"]
             end
@@ -115,7 +91,6 @@ module Kubernetes
             hostname_db[number] = true
             node
           end
-
           @list = hostname_nodes.select { |c| c["hostname"] != c["current_hostname"] }
           @list.empty?
         end
@@ -194,7 +169,8 @@ module Kubernetes
       Tasks.new_task "Joining nodes to cluster", list_title: "Nodes to join" do
         check? do
           @list = parallel_list workers do |node|
-            !Server.remote_check(node, "kubectl --kubeconfig  /etc/kubernetes/kubelet.conf get nodes | grep $(hostname)")
+            # !Server.remote_check(node, "kubectl --kubeconfig  /etc/kubernetes/kubelet.conf get nodes | grep $(hostname)")
+            !Server.remote_check(node, "kubectl --kubeconfig  /etc/kubernetes/kubelet.conf get nodes")
           end
           @list.empty?
         end
@@ -209,6 +185,7 @@ module Kubernetes
       end
 
       Tasks.new_task "Copying over cluster configuration file" do
+        cluster_config_file = options[:kubeconfig]
         check? { File.exist?(cluster_config_file) }
         exec do
           logger.puts_blue("Downloading kubeconfig to #{cluster_config_file}")
@@ -217,38 +194,6 @@ module Kubernetes
       end
 
       Tasks.run
-    end
-
-    private
-
-    def read_and_filter
-      config = YAML.load_file(@options[:config_file])
-
-      @nodes = config.select { |node| node["remove"] != true }
-
-      @master = {}
-      @workers = []
-
-      @nodes.each do |node|
-        case node['role']
-        when 'node'
-          @workers << node
-        when nil
-          node["role"] = "node"
-          @workers << node
-        when 'master'
-          next @master = node if @master.empty?
-          raise 'only 1 master node is supported'
-        else
-          raise "invalid node type: #{node.inspect}"
-        end
-      end
-
-      raise 'no master node' if @master.empty?
-    end
-
-    def check_hostname(node)
-      puts node["hostname"]
     end
   end
 end

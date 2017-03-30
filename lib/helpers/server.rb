@@ -33,7 +33,7 @@ class Server
     end
 
     def ping(node)
-      `ping -c 1 "#{node['ip']}"`
+      `ping -c 3 "#{node['ip']}"`
       $CHILD_STATUS.success?
     end
 

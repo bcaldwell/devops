@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class Ansible
   def initialize(playbook_dir: "./ansible/playbooks", role_dir: "./ansible/roles", default_host: "server")
     @playbook_dir = playbook_dir
@@ -5,17 +7,18 @@ class Ansible
     @default_host = default_host
   end
 
-  def run_playbook(nodes, playbook, options = {})
+  def run_playbook(nodes, playbook, options: {}, host: @default_host)
+    nodes = [nodes] unless nodes.is_a? Array
     default_options = {
-      hosts: @default_host
+      hosts: host
     }
     options = default_options.merge(options)
     options_string = options.map { |a, b| "#{a}=#{b}" }.join(" ")
 
-    hosts_file = File.join(@playbook_dir, 'kubernetes-setup-hosts')
+    hosts_file = File.join(@playbook_dir, 'temp-ansible-hosts')
     playbook_file = File.join(@playbook_dir, "#{playbook}.yml")
     node_entries = nodes.map { |node| ansible_host_entry(node) }
-    File.write(hosts_file, "[kubernetes]\n#{node_entries.join("\n")}")
+    File.write(hosts_file, "[#{host}]\n#{node_entries.join("\n")}")
 
     exit_code = system({ "ANSIBLE_ROLES_PATH" => @role_dir },
       'ansible-playbook', playbook_file,
