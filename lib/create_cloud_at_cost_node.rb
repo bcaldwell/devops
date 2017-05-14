@@ -17,16 +17,18 @@ API_KEY = secrets.cloud_at_cost_api_key
 
 EMAIL = secrets.cloud_at_cost_email
 
-CPU = 2
-RAM = 1024
-STORAGE = 25
+CPU = 3
+RAM = 2048
+STORAGE = 30
 OS = 27
+DATACENTER = 3
 
 Printer.put_header("Configuration")
 Printer.log("CPU: #{CPU}")
 Printer.log("RAM: #{RAM}")
 Printer.log("STORAGE: #{STORAGE}")
 Printer.log("OS: #{OS}")
+Printer.log("DATACENTER: #{DATACENTER}")
 Printer.put_footer true
 
 Printer.put_header("Requesting server to be built")
@@ -37,7 +39,8 @@ body = {
   cpu: CPU,
   ram: RAM,
   storage: STORAGE,
-  os: OS
+  os: OS,
+  datacenter: DATACENTER
 }
 http = Net::HTTP.new(uri.host, uri.port)
 http.use_ssl = true

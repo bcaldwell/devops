@@ -7,7 +7,7 @@ require 'yaml'
 require 'byebug'
 module Kubernetes
   class Base
-    PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 
     def initialize
       @options = {}

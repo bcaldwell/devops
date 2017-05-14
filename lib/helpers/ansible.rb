@@ -7,7 +7,7 @@ class Ansible
     @default_host = default_host
   end
 
-  def run_playbook(nodes, playbook, options: {}, host: @default_host)
+  def run_playbook(nodes, playbook, host: @default_host, options: {})
     nodes = [nodes] unless nodes.is_a? Array
     default_options = {
       hosts: host
