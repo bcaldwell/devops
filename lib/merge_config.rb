@@ -33,5 +33,5 @@ if File.exist?(DefaultConfig)
 
 else
   puts "🐧 copying config to \x1b[34m#{DefaultConfig}\x1b[0m"
-  fileUtils.copy(config_file, DefaultConfig)
+  FileUtils.copy(config_file, DefaultConfig)
 end

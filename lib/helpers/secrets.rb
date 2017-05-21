@@ -24,7 +24,8 @@ class Secrets
 
     encrypted_json = JSON.parse(File.read(ejson_path))
     public_key = encrypted_json['_public_key']
-    raise "Private key is not listed in #{private_key_path}." unless File.exist?("/opt/ejson/keys/#{public_key}")
+    private_key_path = "/opt/ejson/keys/#{public_key}"
+    raise "Private key is not listed in #{private_key_path}." unless File.exist?(private_key_path)
 
     output, status = Open3.capture2e("ejson", "decrypt", ejson_path.to_s)
     raise "ejson: #{output}" unless status.success?

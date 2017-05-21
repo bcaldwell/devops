@@ -10,7 +10,7 @@ class Ansible
   def run_playbook(nodes, playbook, host: @default_host, options: {})
     nodes = [nodes] unless nodes.is_a? Array
     default_options = {
-      hosts: host
+      hosts: host,
     }
     options = default_options.merge(options)
     options_string = options.map { |a, b| "#{a}=#{b}" }.join(" ")
@@ -20,7 +20,7 @@ class Ansible
     node_entries = nodes.map { |node| ansible_host_entry(node) }
     File.write(hosts_file, "[#{host}]\n#{node_entries.join("\n")}")
 
-    exit_code = system({ "ANSIBLE_ROLES_PATH" => @role_dir },
+    exit_code = system({ "ANSIBLE_ROLES_PATH" => @role_dir, "ANSIBLE_HOST_KEY_CHECKING" => "False" },
       'ansible-playbook', playbook_file,
       '-i', hosts_file,
       '-e', options_string.to_s
