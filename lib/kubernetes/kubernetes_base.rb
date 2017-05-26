@@ -28,10 +28,11 @@ module Kubernetes
       @secrets = Secrets.new(@options[:ejson_file])
 
       OptionParser.new do |opts|
-        opts.banner = "Usage: kubernetes-setup [options]"
+        opts.banner = "Usage: kubernetes init [options]"
 
         opts.on('-c', '--config NAME', 'config file') { |v| @options[:config_file] = File.expand_path(v) }
-        opts.on('-c', '--kubeconfig NAME', 'kubeconfig file') { |v| @options[:kubeconfig] = File.expand_path(v) }
+        opts.on('-k', '--kubeconfig NAME', 'location to copy new kube config file to') { |v| @options[:kubeconfig] = File.expand_path(v) }
+        opts.on('-e', '--ejson NAME', 'ejson file') { |v| @options[:ejson_file] = File.expand_path(v) }
 
       end.parse!
 
