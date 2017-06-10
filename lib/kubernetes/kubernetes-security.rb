@@ -44,7 +44,7 @@ module Kubernetes
         end
       end
 
-      Tasks.new_task "Setting up filewall", end_check: false do
+      Tasks.new_task "Setting up firewall", end_check: false do
         check? { false }
         exec do
           ansible.run_playbook(nodes, "kubernetes/firewall", options: {
