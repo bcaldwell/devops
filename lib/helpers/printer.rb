@@ -48,7 +48,6 @@ class Printer
       else
         text = "💥  Failed! Aborting! "
         put_edge("\x1b[31m", "┗━━ ", text)
-        exit
       end
     end
 

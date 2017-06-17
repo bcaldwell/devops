@@ -21,7 +21,7 @@ module Kubernetes
         check? do
           @list = nodes.select{ |node| node["user"] != "cloud" }
         end
-        
+
         exec do
           ansible.run_playbook(nodes, "cloud-user", options: {
             user_password: UnixCrypt.build(secrets.cloud_user_password)

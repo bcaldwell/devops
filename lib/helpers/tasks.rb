@@ -2,10 +2,11 @@ require_relative "./printer"
 require "byebug"
 module Tasks
   class Task
-    def initialize(name, list_title = nil, end_check = true)
+    def initialize(name, list_title = nil, end_check = true, allow_failure = false)
       @name = name
       @list_title = list_title
       @end_check = end_check
+      @allow_failure = allow_failure
     end
 
     def check?(&blk)
@@ -25,7 +26,7 @@ module Tasks
     end
 
     def run
-      if !@set_list.nil? && @exec.nil? && @call.nil?
+      if !@set_list.nil? && @exec.nil?
         @list_title = @name if @list_title.nil?
         list_run
       else
@@ -40,8 +41,8 @@ module Tasks
     end
 
     def exec_run
-      return if @exec.nil? && @call.nil?
-      if @check.call
+      return if @exec.nil?
+      if !@check.nil? && @check.call
         return logger.puts_coloured("{{green: ✓}} #{@name} (already done)")
       else
         print_list
@@ -54,11 +55,12 @@ module Tasks
           successful = false
         end
       end
-      if @end_check == false || (successful && @check.call)
+      if @end_check == false || !@check.nil? || (successful && @check.call)
         logger.put_footer
       else
         logger.puts_failure("Check failed after executing task")
         logger.put_footer false
+        exit unless @allow_failure
       end
     end
 
@@ -75,6 +77,7 @@ module Tasks
         logger.log item
       end
       logger.put_footer sucessful
+      exit if !sucessful && @allow_failure != true
     end
 
     def logger
@@ -83,8 +86,8 @@ module Tasks
   end
 
   @tasks = []
-  def self.new_task(name, list_title: nil, end_check: true, &blk)
-    check = Task.new(name, list_title, end_check).tap { |c| c.instance_eval(&blk) }
+  def self.new_task(name, list_title: nil, end_check: true, check: true, allow_failure: false, &blk)
+    check = Task.new(name, list_title, end_check, check, allow_failure).tap { |c| c.instance_eval(&blk) }
     @tasks.push(check)
     check
   end

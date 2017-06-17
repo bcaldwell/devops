@@ -11,10 +11,7 @@ require 'parallel'
 module Kubernetes
   class Check < Kubernetes::Base
     def run
-
-      master = @master
       nodes = @nodes
-
 
       Tasks.new_task "Pinging Nodes" do
         list do
@@ -43,7 +40,7 @@ module Kubernetes
             node['alive'] = true
             begin
               Server.remote_command(node, "ls")
-            rescue Net::SSH::ConnectionTimeout 
+            rescue Net::SSH::ConnectionTimeout
               node['alive'] = false
             end
             node
