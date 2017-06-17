@@ -23,7 +23,6 @@ module Kubernetes
       @options[:node_hostname] = "kube-node-{{number}}"
       @options[:node_hostname_regex] = /^kube-node-(\d*)$/
 
-
       @ansible = Ansible.new(playbook_dir: playbook_dir, role_dir: role_dir, default_host: "kubernetes")
       @secrets = Secrets.new(@options[:ejson_file])
 
@@ -33,7 +32,6 @@ module Kubernetes
         opts.on('-c', '--config NAME', 'config file') { |v| @options[:config_file] = File.expand_path(v) }
         opts.on('-k', '--kubeconfig NAME', 'location to copy new kube config file to') { |v| @options[:kubeconfig] = File.expand_path(v) }
         opts.on('-e', '--ejson NAME', 'ejson file') { |v| @options[:ejson_file] = File.expand_path(v) }
-
       end.parse!
 
       FileUtils.mkdir_p(@options[:config_dir]) unless File.exist?(@options[:config_dir])

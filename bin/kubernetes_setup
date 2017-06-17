@@ -5,6 +5,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'bundler/setup'
 
-require 'kubernetes-setup'
+require 'kubernetes_ssetup'
 
 Kubernetes::Setup.new.run

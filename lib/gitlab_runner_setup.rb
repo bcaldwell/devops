@@ -39,7 +39,6 @@ module Gitlab
 
         opts.on('--ip NAME', 'node ip address') { |v| @node["ip"] = v }
         opts.on('-u', '--user NAME', 'node ip address') { |v| @node["user"] = v }
-
       end.parse!
 
       raise "ip for node not provided" unless @node["ip"]
@@ -50,7 +49,6 @@ module Gitlab
       secrets = @secrets
       ansible = @ansible
       node = @node
-      nodes = [node]
 
       Tasks.new_task "Pinging Nodes" do
         list do
