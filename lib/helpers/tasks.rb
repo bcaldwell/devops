@@ -86,8 +86,8 @@ module Tasks
   end
 
   @tasks = []
-  def self.new_task(name, list_title: nil, end_check: true, check: true, allow_failure: false, &blk)
-    check = Task.new(name, list_title, end_check, check, allow_failure).tap { |c| c.instance_eval(&blk) }
+  def self.new_task(name, list_title: nil, end_check: true, allow_failure: false, &blk)
+    check = Task.new(name, list_title, end_check, allow_failure).tap { |c| c.instance_eval(&blk) }
     @tasks.push(check)
     check
   end

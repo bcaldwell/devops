@@ -1,0 +1,67 @@
+#!/usr/bin/ruby
+
+dir = File.join(File.dirname(__FILE__), '..', 'lib')
+
+$LOAD_PATH.unshift(dir)
+
+require 'bundler/setup'
+require 'helpers/printer'
+require 'pathname'
+
+def pretty_file (f)
+  f.to_s.gsub(/[_\/]|.rb$/, ' ').strip
+end
+
+def classify (s)
+  s = s.to_s.split('_').collect(&:capitalize).join
+  s[0] = s[0].capitalize
+  s
+end
+
+base_path = Pathname.new(dir)
+files = Dir.glob("#{dir}/**/*.rb")
+  .map{ |f| Pathname.new(f).relative_path_from(base_path)}
+  .reject{ |f| f.to_s.start_with?("helpers", "base")}
+
+if ARGV.empty?
+  puts "Script name not passed in."
+  Printer.put_header "Available scripts"
+  files.each do |file|
+    Printer.log pretty_file file
+  end
+  Printer.put_footer
+  exit
+end
+
+search_string = ARGV.join(" ")
+
+require 'fuzzy_match'
+
+result = FuzzyMatch.new(files).find(search_string)
+
+if result.nil?
+  Printer.puts_failure "Failed to find script"
+end
+
+puts "Running #{pretty_file result}"
+
+require result
+
+class_name = ""
+
+result.dirname.split.each do |i|
+  next if i.to_s == "."
+  class_name += "#{classify(i)}::"
+end
+
+basename = result.basename(".*")
+class_name += classify(basename)
+
+klass = eval class_name
+klass = klass.new
+
+if klass.respond_to? :run
+  klass.run
+else
+  Printer.puts_failure "No run method"
+end

@@ -1,7 +1,4 @@
-# Add current directory to load path
-$LOAD_PATH.unshift File.dirname(__FILE__)
-
-require 'kubernetes_base'
+require 'kubernetes/base'
 
 require 'helpers/printer'
 require 'helpers/tasks'
