@@ -16,7 +16,8 @@ module Helpers
       @default_test = default_test || {
         CheckRate: 300,
         TestType: "PING",
-        FollowRedirect: 1
+        FollowRedirect: 1,
+        TriggerRate: 5
       }
     end
 
@@ -78,6 +79,22 @@ module Helpers
     def new_ping_test_for_node(node)
       node["hostname"] = Server.hostname(node) unless node["hostname"]
       new_test(
+        WebsiteName: node["hostname"],
+        WebsiteURL: node["ip"]
+      )
+    end
+
+    def update_test(test_id, options)
+      options["TestID"] = test_id
+      options.merge!(@default_test)
+      response = @api_endpoint["Tests/Update"].put options, @base_params
+      puts response.code
+    end
+
+    def update_test_for_node(test_id, node)
+      node["hostname"] = Server.hostname(node) unless node["hostname"]
+      update_test(
+        test_id,
         WebsiteName: node["hostname"],
         WebsiteURL: node["ip"]
       )

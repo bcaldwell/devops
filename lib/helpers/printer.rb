@@ -10,7 +10,7 @@ class Printer
 
   class << self
     def put_header(text, color = "\x1b[36m")
-      put_edge(color, "┏━━ ", text)
+      put_edge(color, "┏━━ ", text + " ")
     end
 
     def put_edge(color, prefix, text)

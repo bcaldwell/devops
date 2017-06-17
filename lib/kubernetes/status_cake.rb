@@ -1,6 +1,7 @@
 require 'kubernetes/base'
 
 require 'helpers/status_cake'
+require 'helpers/server'
 
 require 'parallel'
 
@@ -9,55 +10,46 @@ module Kubernetes
     def run
       nodes = @nodes
 
-      api = @api = Helpers::StatusCake.new(@secrets.status_cake_username, @secrets.status_cake_api_key)
+      api = Helpers::StatusCake.new(@secrets.status_cake_username, @secrets.status_cake_api_key)
 
-      puts api.delete_test(2295146)
+      tests = api.all_tests_details(tags: "kube")
 
+      nodes.each_with_index do |node|
+        test = tests.find { |t| t["URI"] == node["ip"] }
+        node["hostname"] = Server.hostname(node) unless node["hostname"]
 
+        if test
+          tests -= [test]
+        end
+        if node["hostname"] != test["WebsiteName"]
+          info_printer("Updating test for #{node['hostname']}")
+          api.update_test_for_node(test["TestID"], node)
+        elsif test.nil?
+          info_printer("Creating test for #{node['hostname']}")
+          api.new_ping_test_for_node(node)
+        end
+      end
 
-      # Tasks.new_task "Pinging Nodes" do
-      #   list do
-      #     Parallel.map(nodes) do |node|
-      #       node['alive'] = if Server.ping(node)
-      #         true
-      #       else
-      #         false
-      #       end
-      #       node
-      #     end
-      #   end
+      tests.each do |test|
+        info_printer("Creating test for #{test['WebsiteName']}")
+        api.delete_test(test["TestID"])
+      end
 
-      #   list_logger do |node|
-      #     if node['alive'] == true
-      #       logger.puts_coloured("{{green:┃ ✓}} #{node['ip']}   role: #{node['role']}")
-      #     else
-      #       logger.puts_coloured("{{red:┃ ✗}} #{node['ip']}   role: #{node['role']}")
-      #     end
-      #   end
-      # end
+      print_footer
+    end
 
-      # Tasks.new_task "ssh access" do
-      #   list do
-      #     Parallel.map(nodes) do |node|
-      #       node['alive'] = true
-      #       begin
-      #         Server.remote_command(node, "ls")
-      #       rescue Net::SSH::ConnectionTimeout
-      #         node['alive'] = false
-      #       end
-      #       node
-      #     end
-      #   end
-      #   list_logger do |node|
-      #     if node['alive'] == true
-      #       logger.puts_coloured("{{green:┃ ✓}} #{node['ip']}   role: #{node['role']}")
-      #     else
-      #       logger.puts_coloured("{{red:┃ ✗}} #{node['ip']}   role: #{node['role']}")
-      #     end
-      #   end
-      # end
+    def info_printer(text)
+      if @printed.nil?
+        Printer.put_header("Updating Status Cake")
+        @printed = true
+      end
+      Printer.puts_success(text)
+    end
 
-      # Tasks.run
+    def print_footer
+      if @printed
+        Printer.put_footer
+      end
     end
   end
 end
