@@ -57,4 +57,4 @@ module Kubernetes
   end
 end
 
-Kubernetes::Security.new.run if __FILE__ == $PROGRAM_NAME
+Kubernetes::Check.new.run if __FILE__ == $PROGRAM_NAME

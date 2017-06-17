@@ -1,5 +1,4 @@
 require "cac/version"
-require 'rest_client'
 require 'json'
 
 class Cac

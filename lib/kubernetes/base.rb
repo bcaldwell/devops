@@ -1,5 +1,7 @@
 require 'helpers/ansible'
 require 'helpers/secrets'
+require 'helpers/tasks'
+require 'helpers/printer'
 
 require 'optparse'
 require 'yaml'
