@@ -1,10 +1,9 @@
 #!/usr/bin/ruby
 
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib/kubernetes'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'bundler/setup'
 
-require 'kubernetes-security'
+require 'kubernetes/security'
 
 Kubernetes::Security.new.run
