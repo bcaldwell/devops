@@ -33,7 +33,6 @@ module Kubernetes
             logger.puts_coloured("{{green:┃ ✓}} #{node['ip']}   role: #{node['role']}")
           else
             logger.puts_coloured("{{red:┃ ✗}} #{node['ip']}   role: #{node['role']}")
-            false
           end
         end
       end
@@ -55,7 +54,6 @@ module Kubernetes
             logger.puts_coloured("{{green:┃ ✓}} #{node['ip']}   role: #{node['role']}")
           else
             logger.puts_coloured("{{red:┃ ✗}} #{node['ip']}   role: #{node['role']}")
-            false
           end
         end
       end
