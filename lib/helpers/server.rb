@@ -10,7 +10,12 @@ class Server
       host = remote_host(node)
       output = ''
       on host do |_host|
-        output = capture(*command)
+        begin
+          output = capture(*command)
+        rescue StandardError => e
+          # puts "ERROR: #{e}"
+          # raise e
+        end
       end
       output
     end

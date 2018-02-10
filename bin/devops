@@ -4,7 +4,9 @@ dir = File.join(File.dirname(__FILE__), '..', 'lib')
 
 $LOAD_PATH.unshift(dir)
 
+require 'rubygems'
 require 'bundler/setup'
+
 require 'helpers/printer'
 require 'pathname'
 

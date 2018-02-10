@@ -1,0 +1,18 @@
+#!/usr/bin/ruby
+
+dir = File.join(File.dirname(__FILE__), '..', 'lib')
+
+$LOAD_PATH.unshift(dir)
+
+require 'rubygems'
+require 'bundler/setup'
+
+require 'helpers/printer'
+require 'pathname'
+
+require 'helpers/ansible'
+require 'helpers/unix_crypt'
+
+ansible = Ansible.new
+
+ansible.run_playbook({ "ip" => "45.62.237.141", "password" => "Qepy7Y3eGe" }, "setup/expand-boot-partition")

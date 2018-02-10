@@ -2,6 +2,7 @@
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
+require 'rubygems'
 require 'bundler/setup'
 
-require 'create_cloud_at_cost_node'
+require 'cloud_at_cost/create_node'

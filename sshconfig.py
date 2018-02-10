@@ -6,7 +6,7 @@ def pprint(o):
     print json.dumps(o, indent=4, sort_keys=True)
 
 class yamlConfig(object):
-    def __init__(self, filename="server-config.yaml"):
+    def __init__(self, filename="config/server-config.yaml"):
         with open(filename, "r") as yml:
             try:
                 self.data = yaml.load(yml)

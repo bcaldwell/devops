@@ -9,7 +9,7 @@ require 'uri'
 require 'json'
 require 'yaml'
 
-PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
 secrets = Secrets.new(File.join(PROJECT_DIR, "config", "secrets.ejson"), [:cloud_at_cost_email, :cloud_at_cost_api_key])
 
@@ -20,7 +20,21 @@ EMAIL = secrets.cloud_at_cost_email
 CPU = 3
 RAM = 2048
 STORAGE = 30
-OS = 27
+OS = 24
+
+# CentOS 6.7 64bit: 1
+# CentOS 6.9 64bit: 23
+# CentOS-7-64bit: 15
+# Debian-8-64bit: 3
+# Debian-8.8-64bit: 22
+# FreeBSD-10-1-64bit: 18
+# Ubuntu-14.04.1-LTS-64bit: 16
+# Ubuntu-16.04.2-LTS-64bit: 24
+# Windows 10 64bit: 25
+# Windows 2008 R2 64bit: 13
+# Windows 2012 R2 64bit: 14
+# Windows 7 64bit: 4
+
 DATACENTER = 3
 
 Printer.put_header("Configuration")
@@ -53,17 +67,6 @@ Printer.log JSON.pretty_generate(server_built)
 Printer.put_footer true
 
 Printer.put_header("Setting run mode to normal")
-uri = URI.parse('https://panel.cloudatcost.com/api/v1/listservers.php')
-params = {
-  login: EMAIL,
-  key: API_KEY
-}
-uri.query = URI.encode_www_form(params)
-resp = JSON.parse(Net::HTTP.get(uri))
-Printer.log "List server request status: #{resp['status']}"
-server = resp["data"].select { |node| node["servername"] == server_built["servername"] }.first
-# Add params to URI
-uri.query = URI.encode_www_form(params)
 
 uri = URI.parse("https://panel.cloudatcost.com/api/v1/runmode.php")
 body = {
@@ -82,7 +85,19 @@ resp = JSON.parse(response.body)
 Printer.log JSON.pretty_generate(resp)
 Printer.put_footer true
 
+
 Printer.put_header "Server data"
+
+uri = URI.parse('https://panel.cloudatcost.com/api/v1/listservers.php')
+params = {
+  login: EMAIL,
+  key: API_KEY
+}
+uri.query = URI.encode_www_form(params)
+resp = JSON.parse(Net::HTTP.get(uri))
+Printer.log "List server request status: #{resp['status']}"
+server = resp["data"].select { |node| node["servername"] == server_built["servername"] }.first
+
 server_data = [
   {
     "ip" => server["ip"],

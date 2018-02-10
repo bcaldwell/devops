@@ -1,10 +1,10 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    byebug (9.0.6)
+    byebug (10.0.0)
     domain_name (0.5.20170404)
       unf (>= 0.0.5, < 1.0.0)
-    ejson (1.0.2)
+    ejson (1.1.0)
     fuzzy_match (2.1.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
@@ -13,14 +13,14 @@ GEM
     mime-types-data (3.2016.0521)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
-    net-ssh (4.1.0)
+    net-ssh (4.2.0)
     netrc (0.11.0)
-    parallel (1.11.2)
+    parallel (1.12.1)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
       netrc (~> 0.8)
-    sshkit (1.13.1)
+    sshkit (1.16.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
     unf (0.1.4)
@@ -31,7 +31,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  byebug (~> 9.0)
+  byebug (> 9.0)
   ejson (~> 1.0)
   fuzzy_match (~> 2.1)
   parallel (~> 1.11)
@@ -39,4 +39,4 @@ DEPENDENCIES
   sshkit (~> 1.13)
 
 BUNDLED WITH
-   1.15.1
+   1.16.1

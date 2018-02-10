@@ -21,12 +21,12 @@ module Kubernetes
         if test
           tests -= [test]
         end
-        if node["hostname"] != test["WebsiteName"]
-          info_printer("Updating test for #{node['hostname']}")
-          api.update_test_for_node(test["TestID"], node)
-        elsif test.nil?
+        if test.nil?
           info_printer("Creating test for #{node['hostname']}")
           api.new_ping_test_for_node(node)
+        elsif node["hostname"] != test["WebsiteName"]
+          info_printer("Updating test for #{node['hostname']}")
+          api.update_test_for_node(test["TestID"], node)
         end
       end
 

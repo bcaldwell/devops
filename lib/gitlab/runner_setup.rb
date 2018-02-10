@@ -14,7 +14,7 @@ require 'byebug'
 
 module Gitlab
   class RunnerSetup
-    PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+    PROJECT_DIR = File.expand_path(File.join(File.dirname(__FILE__), '../..'))
 
     def initialize
       @options = {}
@@ -86,7 +86,7 @@ module Gitlab
           Server.remote_check(node, "which python")
         end
         exec do
-          ansible.run_playbook(node, 'ansible-bootstrap-ubuntu-16.04')
+          ansible.run_playbook(node, 'setup/ansible-bootstrap-ubuntu-16')
         end
       end
 

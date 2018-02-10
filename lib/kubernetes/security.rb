@@ -17,10 +17,11 @@ module Kubernetes
       Tasks.new_task "Adding cloud user", end_check: false do
         check? do
           @list = nodes.select{ |node| node["user"] != "cloud" }
+          @list.empty?
         end
 
         exec do
-          ansible.run_playbook(nodes, "cloud-user", options: {
+          ansible.run_playbook(@list, "setup/cloud-user", options: {
             user_password: UnixCrypt.build(secrets.cloud_user_password)
           })
         end
@@ -41,15 +42,15 @@ module Kubernetes
         end
       end
 
-      Tasks.new_task "Setting up firewall", end_check: false do
-        check? { false }
-        exec do
-          ansible.run_playbook(nodes, "kubernetes/firewall", options: {
-            node_ips: nodes.map { |node| node["ip"] }.to_s.gsub!(/\s+/, ''),
-            master_ip: master["ip"]
-          })
-        end
-      end
+      # Tasks.new_task "Setting up firewall", end_check: false do
+      #   check? { false }
+      #   exec do
+      #     ansible.run_playbook(nodes, "kubernetes/firewall", options: {
+      #       node_ips: nodes.map { |node| node["ip"] }.to_s.gsub!(/\s+/, ''),
+      #       master_ip: master["ip"]
+      #     })
+      #   end
+      # end
 
       Tasks.run
     end
